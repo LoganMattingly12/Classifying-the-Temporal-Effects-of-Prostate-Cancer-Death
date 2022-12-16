@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Sep  7 13:36:12 2022
-
 @author: ltmat
 """
-
 import pandas as pd 
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -20,7 +17,7 @@ from sklearn.utils import resample as rs
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
 
-#Detrmines the prognosis sample
+#Detrmines the temporal interval
 survival_months = 120
 #Sets the data normilization method
 data_norm = "None"
@@ -75,6 +72,7 @@ X_train = pd.DataFrame(X_train)
 X_test = pd.DataFrame(X_test)
 y_train = pd.DataFrame(y_train)
 
+#Data Norm Loop
 if data_norm == "SMOTE":
     X_train = pd.DataFrame(X_train)
     y_train = pd.DataFrame(y_train)
@@ -87,7 +85,6 @@ if data_norm == "SMOTE":
     dataset = dataframe
     X_train = dataset.iloc[:, :-1]
     y_train = dataset.iloc[:, -1]
-    print(y_train.value_counts())
 
 if data_norm == 'RUS':
     train_data = pd.concat([X_train, y_train], axis = 1)
@@ -102,24 +99,18 @@ if data_norm == 'RUS':
     y_train = dataset.iloc[:, -1]
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.fit_transform(X_test)
-    y_test.value_counts()
     
 else:
     pass
-#train_data = pd.concat([X_train, y_train], axis = 1)
-
 print(y_train.value_counts())
 
 print('Data Compiled')
-
 
 #Model Training
 tf.random.set_seed(568)
 y_train = np.ravel(y_train)
 logr = linear_model.LogisticRegression(random_state=1234, max_iter=1000).fit(X_train,y_train) 
 print('Logistic Regression Fit')
-
-
 model = tf.keras.Sequential([
     tf.keras.layers.Dense((len(selected_feat)+1), activation='relu'),
     tf.keras.layers.Dense(np.mean(len(selected_feat)+1), activation='relu'),
@@ -136,7 +127,6 @@ print('ANN Fit')
 
 #LR Testing
 y_pred_logr = logr.predict(X_test)
-
 #Logistic Regression Metrics
 print('Logistic Regression')
 test2 = (accuracy_score(y_test,y_pred_logr)*100)
@@ -149,12 +139,10 @@ print('The AUC is '+str(auc))
 cm = confusion_matrix(y_test,y_pred_logr,labels = [0,1])
 print(cm)
 
-
 #TF Testing
 predictions = model.predict(X_test)
 tf_ypred = [1 if prob >=
             0.5 else 0 for prob in np.ravel(predictions)]
-
 #TF Model Metrics
 print('\nTensorFlow')
 test6 = (accuracy_score(y_test,tf_ypred)*100)
